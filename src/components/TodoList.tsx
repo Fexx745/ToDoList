@@ -11,6 +11,7 @@ interface Task {
 export default function TodoList() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
+    const [filterCompleted, setFilterCompleted] = useState<boolean>(false);
 
     useEffect(() => {
         const storedTasks = JSON.parse(localStorage.getItem("tasks") || "[]") as Task[];
@@ -78,11 +79,42 @@ export default function TodoList() {
         setTasks(updatedTasks);
     };
 
+    const filteredTasks = filterCompleted
+        ? tasks.filter(task => task.completed)
+        : tasks;
+
     return (
-        <div className="max-w-md mx-auto p-4 mt-20 bg-gray-100 rounded-lg shadow-md">
-            <h1 className="text-2xl font-bold mb-4">To-Do List</h1>
+        <div className="max-w-md mx-auto p-6 mt-16 bg-white rounded-xl shadow-lg border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-3 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    To-Do List
+                </h1>
+                <div className="bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+                    {filteredTasks.length} รายการ
+                </div>
+            </div>
+
             <TaskInput addTask={addTask} />
-            <TaskList tasks={tasks} toggleTask={toggleTask} editTask={editTask} deleteTask={deleteTask} />
+
+            <div className="flex justify-between items-center mb-4 mt-6">
+                <button
+                    onClick={() => setFilterCompleted(prev => !prev)}
+                    className="text-sm font-medium px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600 hover:text-blue-800 focus:outline-none transition duration-300 ease-in-out transform hover:scale-105"
+                >
+                    {filterCompleted ? "แสดงทั้งหมด" : "แสดงเฉพาะงานที่ทำแล้ว"}
+                </button>
+
+                <div className="text-sm text-gray-500">
+                    เสร็จแล้ว {tasks.filter(task => task.completed).length}/{tasks.length}
+                </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-4">
+                <TaskList tasks={filteredTasks} toggleTask={toggleTask} editTask={editTask} deleteTask={deleteTask} />
+            </div>
         </div>
     );
 }
